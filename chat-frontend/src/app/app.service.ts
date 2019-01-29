@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient , HttpParams} from '@angular/common/http';
+import { HttpClient , HttpParams, HttpErrorResponse} from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 @Injectable({
@@ -37,5 +37,16 @@ export class AppService {
     .set('password',data.password);
 
     return this.http.post(`${this.url}/api/v1/users/login`,params);
+  }
+
+  private handleError(err: HttpErrorResponse){
+    let errorMessage = '';
+    if(err.error instanceof Error){
+        errorMessage = `An error occurred: ${err.error.message}`;
+    }else{
+        errorMessage = `Server returned code: ${err.status}, error message is: ${err.message}`;
+    }
+    console.error(errorMessage);
+    return Observable.throw(errorMessage);
   }
 }
