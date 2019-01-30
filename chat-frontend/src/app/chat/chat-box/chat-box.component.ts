@@ -16,7 +16,9 @@ export class ChatBoxComponent implements OnInit {
   public userInfo:any;
   public receiverId:any;
   public receiverName:any;
+  public pageValue:any;
   public userList:any = [];
+  public messageList:any = [];
   public disconnectedSocket: boolean;
 
   constructor(
@@ -66,5 +68,16 @@ export class ChatBoxComponent implements OnInit {
       console.log(this.userList);
     });
   }
+
+  public getPreviousChatWithAUser:any = () =>{
+    let previousData = (this.messageList.length > 0 ? this.messageList.slice():[]);
+    this.socketService.getChat(this.userInfo.userId,this.receiverId,this.pageValue * 10)
+    .subscribe((apiResponse)=>{
+        console.log(apiResponse);
+     if(apiResponse.status === 200){
+        this.messageList = apiResponse.data.concat(previousData);
+     }
+    });
+  } 
   
 }
