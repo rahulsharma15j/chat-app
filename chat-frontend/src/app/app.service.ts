@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient , HttpParams, HttpErrorResponse} from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Cookie } from 'ng2-cookies';
 
 @Injectable({
   providedIn: 'root'
@@ -37,6 +38,12 @@ export class AppService {
     .set('password',data.password);
 
     return this.http.post(`${this.url}/api/v1/users/login`,params);
+  }
+
+  public logout:any = ():Observable<any>=>{
+     const params = new HttpParams()
+     .set('authToken',Cookie.get('authToken'));
+     return this.http.post(`${this.url}/api/v1/users/logout`,params);
   }
 
   private handleError(err: HttpErrorResponse){

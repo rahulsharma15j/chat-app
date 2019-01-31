@@ -16,10 +16,13 @@ export class ChatBoxComponent implements OnInit {
   public userInfo:any;
   public receiverId:any;
   public receiverName:any;
-  public pageValue:any;
+  public pageValue:number = 0;
+  public messageText:any;
   public userList:any = [];
   public messageList:any = [];
+  public scrollToChatTop:boolean = false;
   public disconnectedSocket: boolean;
+  public loadingPreviousChat:boolean = false;
 
   constructor(
     public appService:AppService,
@@ -37,6 +40,7 @@ export class ChatBoxComponent implements OnInit {
     this.checkStatus();
     this.verifyUserConfirmation();
     this.getOnlineUserList();
+    this.getMessageFromAUser();
   }
 
   public checkStatus:any = ()=>{
@@ -76,8 +80,101 @@ export class ChatBoxComponent implements OnInit {
         console.log(apiResponse);
      if(apiResponse.status === 200){
         this.messageList = apiResponse.data.concat(previousData);
+     }else{
+       this.messageList = previousData;
+       this.toastr.warning('No message available');
      }
+     this.loadingPreviousChat = false;
+    },(err)=>{
+       this.toastr.error('some error occured');
     });
   } 
+
+  public loadEarlierPageOfChat:any = ()=>{
+    this.loadingPreviousChat = true;
+    this.pageValue++;
+    this.scrollToChatTop = true;
+    this.getPreviousChatWithAUser();
+  }
+
+  public userSelectedToChat:any = (id,name)=>{
+    console.log("Setting user as active");
+    this.userList.map((user)=>{
+        if(user.userId == id){
+           user.chatting = true;
+        }else{
+           user.chatting = false;
+        }
+    });
+    Cookie.set('receiverId',id);
+    Cookie.set('receiverName',name);
+    this.receiverName = name;
+    this.receiverId = id;
+    this.messageList = [];
+    this.pageValue = 0;
+    let chatDetails = {
+      userId:this.userInfo.userId,
+      senderId:id
+    }
+    this.socketService.markChatAsSeen(chatDetails);
+    this.getPreviousChatWithAUser();
+  }
+
   
+  public sendMessageUsingKeypress:any = (event:any)=>{
+    if(event.keyCode === 13){
+      this.sendMessage();
+    }
+  }
+
+  public sendMessage:any = () =>{
+    if(this.messageText){
+       let chatMsgObject = {
+         senderName: this.userInfo.firstName + ' ' + this.userInfo.lastName,
+         senderId:this.userInfo.userId,
+         receiverName:Cookie.get('receiverName'),
+         receiverId:Cookie.get('receiverId'),
+         message:this.messageText,
+         createdOn:new Date()
+       }
+       console.log(chatMsgObject);
+       this.socketService.sendChatMessage(chatMsgObject);
+       this.pushToChatWindow(chatMsgObject);
+    }else{
+      this.toastr.warning('text message can not be empty');
+    }
+  }
+
+  public pushToChatWindow:any = (data)=>{
+    this.messageText = '';
+    this.messageList.push(data);
+    this.scrollToChatTop = false;
+  }
+
+  public getMessageFromAUser:any = ()=>{
+    this.socketService.chatByUserId(this.userInfo.userId)
+    .subscribe((data)=>{
+     (this.receiverId == data.senderId)?this.messageList.push(data):'';
+     this.toastr.success(`${data.senderName} says : ${data.message}`);
+     this.scrollToChatTop = false;
+    });
+  }
+
+  public logout:any = ()=>{
+    this.appService.logout()
+    .subscribe((apiResponse)=>{
+       if(apiResponse.status === 200){
+          console.log('logout called');
+          Cookie.delete('authToken');
+          Cookie.delete('receiverId');
+          Cookie.delete("receiverName");
+          this.socketService.exitSocket();
+          this.router.navigate(['/']);
+      }else{
+          this.toastr.error(apiResponse.message);
+      }
+    },(err)=>{
+       this.toastr.error('some error occured');
+    });
+  }
 }
