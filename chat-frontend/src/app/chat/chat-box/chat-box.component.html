@@ -18,9 +18,11 @@
                    <li class="p-2 typeOfChats">
                      Online Users:
                    </li>
-                   <li class="clearfix cursorPointer" [ngClass]="{'activeChat':user.chatting == true}"
+                   <li class="clearfix cursorPointer" [ngClass]="{'activeChat':user.chatting == true}" (click)="userSelectedToChat(user.userId,user.name)"
                    *ngFor="let user of userList">
-                   <div class="userPresence" *ngIf="user.userId != userInfo.userId">{{user.name}}</div>
+                   <div class="userPresence" *ngIf="user.userId != userInfo.userId">
+                     <!--<user-details [userFirstName]="user.name" [userLastName]="''" [userStatus]="'online'" [messageRead]="user.unread"></user-details>-->
+                   </div>
                   </li>
                  </ul>
                </div>
@@ -42,9 +44,24 @@
             </li>
             <li class="clearfix cursorPointer" [ngClass]="{'activeChat':user.chatting == true}"
             *ngFor="let user of userList">
-              <div class="userPresence" *ngIf="user.userId != userInfo.userId">{{user.name}}</div>
+              <div class="userPresence" *ngIf="user.userId != userInfo.userId"> 
+                <!--<user-details [userFirstName]="user.name" [userLastName]="''" [userStatus]="'online'" [messageRead]="user.unread"></user-details>-->
+              </div>
             </li>
           </ul>
+       </div>
+
+       <div class="col-12 col-sm-8 col-sm-8 chat">
+         <div class="chat-header clearfix mobilemenu" *ngIf="receiverName">
+           <!--<first-char [userName]="receiverName" [userBg]="'blue'" [userColor]="'white'"></first-char>-->
+           <div class="about-chat">
+             <div class="chat-with">Chat with {{receiverName}}</div>
+           </div>
+         </div>
+
+         <div #scrollMe [scrollTop]="(scrollToChatTop)?0:scrollMe.scrollHeight" class="chat-history" *ngIf="receiverName">
+
+         </div>
        </div>
    </div>
 </div>
