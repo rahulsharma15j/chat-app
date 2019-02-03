@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { AppService } from 'src/app/app.service';
 import { SocketService } from 'src/app/socket.service';
 import { Router } from '@angular/router';
@@ -12,6 +12,10 @@ import { Cookie } from 'ng2-cookies';
   providers:[SocketService]
 })
 export class ChatBoxComponent implements OnInit {
+
+  @ViewChild('scrollMe',{read:ElementRef})
+  public scrollMe:ElementRef;
+
   public authToken:any;
   public userInfo:any;
   public receiverId:any;
@@ -158,6 +162,10 @@ export class ChatBoxComponent implements OnInit {
      this.toastr.success(`${data.senderName} says : ${data.message}`);
      this.scrollToChatTop = false;
     });
+  }
+
+  public showUserName = (name:string)=>{
+     this.toastr.success('You are chatting with: '+name);
   }
 
   public logout:any = ()=>{

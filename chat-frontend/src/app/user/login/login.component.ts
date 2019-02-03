@@ -41,7 +41,7 @@ export class LoginComponent implements OnInit {
              console.log(apiRespnse);
              Cookie.set('authToken',apiRespnse.data.authToken);
              Cookie.set('receiverId',apiRespnse.data.userDetails.userId);
-             Cookie.set('receiverName',apiRespnse.data.userDetails.firstName + '' + apiRespnse.data.userDetails.lastName);
+             Cookie.set('receiverName',apiRespnse.data.userDetails.firstName + ' ' + apiRespnse.data.userDetails.lastName);
              this.appService.setUserInfoInLocalStorage(apiRespnse.data.userDetails);
              this.router.navigate(['/chat']);
           }else{
