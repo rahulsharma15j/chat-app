@@ -4,6 +4,7 @@ import { SocketService } from 'src/app/socket.service';
 import { Router } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { Cookie } from 'ng2-cookies';
+import { ChatMessage } from './chat';
 
 @Component({
   selector: 'app-chat-box',
@@ -133,7 +134,7 @@ export class ChatBoxComponent implements OnInit {
 
   public sendMessage:any = () =>{
     if(this.messageText){
-       let chatMsgObject = {
+       let chatMsgObject:ChatMessage = {
          senderName: this.userInfo.firstName + ' ' + this.userInfo.lastName,
          senderId:this.userInfo.userId,
          receiverName:Cookie.get('receiverName'),
