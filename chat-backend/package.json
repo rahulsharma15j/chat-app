@@ -1,0 +1,16 @@
+{
+  "name": "chat-backend",
+  "version": "1.0.0",
+  "description": "chat app API",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "rahul sharma",
+  "license": "ISC",
+  "dependencies": {
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.23",
+    "pino": "^5.11.1"
+  }
+}
