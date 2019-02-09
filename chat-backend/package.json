@@ -9,8 +9,14 @@
   "author": "rahul sharma",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.18.3",
+    "cookie-parser": "^1.4.3",
+    "express": "^4.16.4",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.23",
-    "pino": "^5.11.1"
+    "mongoose": "^5.4.10",
+    "morgan": "^1.9.1",
+    "pino": "^5.11.1",
+    "shortid": "^2.2.14"
   }
 }
