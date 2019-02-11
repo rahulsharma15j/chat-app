@@ -7,6 +7,7 @@ const validateInput = require('./../libs/paramsValidationLib');
 const check = require('../libs/checkLib');
 const passwordLib = require('../libs/generatePasswordLib');
 const UserModel = require('./../models/User');
+const token = require('./../libs/tokenLib');
 
 /**User SignUp function. */
 let signUpFunction = (req,res)=>{
@@ -76,7 +77,87 @@ let signUpFunction = (req,res)=>{
 
 /**User Login function. */
 let logInFunction = (req,res)=>{
+   let findUser = ()=>{
+       console.log('Find user');
+       return new Promise((resolve,reject)=>{
+          if(req.body.email){
+            console.log('req body email is here.');
+            console.log(req.body);
+            UserModel.findOne({ email: req.body.email }, (err, userDetails)=>{
+               if(err){
+                 console.log(err);
+                 logger.error('Failed to retrive user data.','userController: findUser()',10);
+                 reject(response.generate(true,'Failed to find user details.',500,null));
+               }else if(check.isEmpty(userDetails)){
+                 logger.error('No user found.','userController findUser()',7);
+                 reject(response.generate(true,'No user details found.',404,null));
+               }else{
+                 logger.info('User found.','userController findUser()',10);
+                 resolve(userDetails);
+               }
+            });
+          }else{
+              reject(response.generate(true,'"email" parameter is missing.',400,null));
+          }
+       });
+   }
 
+
+   let validatePassword = (retrievedUserDetails)=>{
+       console.log('validate password.');
+       return new Promise((resolve,reject)=>{
+          passwordLib.comparePassword(req.body.password, retrievedUserDetails.password, (err, isMatch)=>{
+             if(err){
+                 console.log(err);
+                 logger.error(err.message,'userController: validateUser()',10);
+                 reject(response.generate(true,'Login failed.',500,null));
+             }else if(isMatch){
+                let retrievedUserDetailsObj = retrievedUserDetails.toObject();
+                delete retrievedUserDetailsObj.password;
+                delete retrievedUserDetailsObj._id;
+                delete retrievedUserDetailsObj.__v;
+                delete retrievedUserDetailsObj.createdOn;
+                delete retrievedUserDetailsObj.modifiedOn;
+                resolve(retrievedUserDetailsObj);
+             }else{
+                 logger.info('login failed due to invalid password.','userController: validatePassword()', 10);
+                 reject(response.generate(true,'Wrong password login failed.', 400,null));
+             }
+          });
+       });
+   }
+
+
+
+   let generateToken = (userDetails)=>{
+      console.log('generate token');
+      return new Promise((resolve,reject)=>{
+        token.generateToken(userDetails, (err, tokenDetails)=>{
+            if(err){
+              console.log(err);
+              reject(response.generate(true,'Failed to generate token.',500,null));
+            }else{
+                tokenDetails.userId = userDetails.userId;
+                tokenDetails.userDetails = userDetails;
+                resolve(tokenDetails);
+            }
+        });
+      });
+   }
+
+
+   findUser(req,res)
+   .then(validatePassword)
+   .then(generateToken)
+   .then((resolve)=>{
+        res.send(false,'Login successfull.',200,resolve);
+   })
+   .catch((err)=>{
+      console.log('err handler.');
+      console.log(err);
+      res.status(err.status);
+      res.send(err);
+   });
 }
 
 /**User LogOut function. */
