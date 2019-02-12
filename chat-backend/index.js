@@ -57,7 +57,7 @@ server.on('error',onError);
 server.on('listening',onListening);
 
 /**Event listener for HTTP server "error" event. */
-let onError = (error)=>{
+function onError(error){
    if(error.syscall !== 'listen'){
      logger.error(error.code + ' not equal listen', 'serverOnErrorHandler',10);
      throw error;
@@ -79,12 +79,12 @@ let onError = (error)=>{
 }
 
 /**Event listener for HTTP server "listening" event. */
-let onListening = ()=>{
+function onListening(){
     let addr = server.address();
     let bind = typeof addr === 'string' ? 'pipe ' + addr : 'port ' + addr.port;
     console.log('Listening on ' + bind);
     logger.info('server listening on port ' + addr.port, 'serverOnListeningHandler', 10);
-    let db = mongoose.connect(appConfig.db.uri,{ useMongoClient:true });
+    let db = mongoose.connect(appConfig.db.uri);
 }
 
 /**Application specific logging, throwing an error, or other logic here. */

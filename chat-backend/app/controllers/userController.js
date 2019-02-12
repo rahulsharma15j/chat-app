@@ -7,6 +7,7 @@ const validateInput = require('./../libs/paramsValidationLib');
 const check = require('../libs/checkLib');
 const passwordLib = require('../libs/generatePasswordLib');
 const UserModel = require('./../models/User');
+const AuthModel = require('./../models/Auth');
 const token = require('./../libs/tokenLib');
 
 /**User SignUp function. */
@@ -145,12 +146,28 @@ let logInFunction = (req,res)=>{
       });
    }
 
+   let saveToken = (tokenDetails)=>{
+       console.log('save token');
+       return new Promise((resolve,reject)=>{
+          AuthModel.findOne({userId: tokenDetails.userId }, (err, retrievedTokenDetails)=>{
+             if(err){
+                console.log(err.message,'userController: saveToken',10);
+                reject(response.generate(true,'Failed to generate token.',500,null));
+             }else if(check.isEmpty(retrievedTokenDetails)){
+                let newAuthToken = new AuthModel({
+                    userId: tokenDetails
+                });
+             }
+          })
+       });
+   }
+
 
    findUser(req,res)
    .then(validatePassword)
    .then(generateToken)
    .then((resolve)=>{
-        res.send(false,'Login successfull.',200,resolve);
+        res.send(response.generate(false,'Login successfull.',200,resolve));
    })
    .catch((err)=>{
       console.log('err handler.');

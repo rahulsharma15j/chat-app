@@ -4,7 +4,7 @@ appCongig.allowedCorsOrigin = "*";
 appCongig.env = "dev";
 appCongig.apiVersion = "/api/v1";
 appCongig.db = {
-    uri:` `
+    uri:`mongodb://node-shop:node-shop@cluster0-shard-00-00-zvxva.mongodb.net:27017,cluster0-shard-00-01-zvxva.mongodb.net:27017,cluster0-shard-00-02-zvxva.mongodb.net:27017/chat?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true`
 };
 
 module.exports = {
