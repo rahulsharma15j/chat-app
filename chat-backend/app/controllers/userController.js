@@ -155,7 +155,40 @@ let logInFunction = (req,res)=>{
                 reject(response.generate(true,'Failed to generate token.',500,null));
              }else if(check.isEmpty(retrievedTokenDetails)){
                 let newAuthToken = new AuthModel({
-                    userId: tokenDetails
+                    userId: tokenDetails.userId,
+                    authToken: tokenDetails.token,
+                    tokenSecret: tokenDetails.tokenSecret,
+                    tokenGenerationTime: time.now()
+                });
+                newAuthToken.save((err, newTokenDetails)=>{
+                   if(err){
+                     console.log(err);
+                     logger.error(err.message,' userController: saveToken', 10);
+                     reject(response.generate(true,'Failed to generate token.', 500,null));
+                   }else{
+                      let responseBody = {
+                         authToken: newTokenDetails.authToken,
+                         userDetails: tokenDetails.userDetails
+                      }
+                      resolve(responseBody);
+                   }
+                });
+             }else{
+                retrievedTokenDetails.authToken = tokenDetails.token;
+                retrievedTokenDetails.tokenSecret = tokenDetails.tokenSecret;
+                retrievedTokenDetails.tokenGenerationTime = time.now();
+                retrievedTokenDetails.save((err, newTokenDetails)=>{
+                   if(err){
+                     console.log(err);
+                     logger.error(err.message,'userController: saveToken', 10);
+                     reject(response.generate(true,'Failed to generate token.', 500, null));
+                   }else{
+                      let responseBody = {
+                         authToken: newTokenDetails.authToken,
+                         userDetails: tokenDetails.userDetails
+                      }
+                      resolve(responseBody);
+                   }
                 });
              }
           })
@@ -166,6 +199,7 @@ let logInFunction = (req,res)=>{
    findUser(req,res)
    .then(validatePassword)
    .then(generateToken)
+   .then(saveToken)
    .then((resolve)=>{
         res.send(response.generate(false,'Login successfull.',200,resolve));
    })
