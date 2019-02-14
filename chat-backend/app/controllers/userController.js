@@ -211,6 +211,62 @@ let logInFunction = (req,res)=>{
    });
 }
 
+/**Get all users details. */
+let getAllUsers = (req, res)=>{
+    UserModel.find()
+    .select('-__v -_id')
+    .lean()
+    .exec((err, result)=>{
+       if(err){
+         console.log(err);
+         logger.error(err.message, 'userController: getAllUsers()', 10);
+         res.send(response.generate(true, 'Failed to find users details.', 500, null));
+       }else if(check.isEmpty(result)){
+         logger.info('No user found.', 'userController: getAllUsers()');
+         res.send(response.generate(true, 'No user found.', 404, null));
+       }else{
+          res.send(response.generate(false, 'All users details found.', 200, null));
+       }
+    })
+}
+
+/**Get single user details. */
+let getSingleUser = (req, res)=>{
+   UserModel.findOne({ 'userId' : req.params.userId })
+   .select('-password -__v -_id')
+   .lean()
+   .exec((err, result)=>{
+       if(err){
+         console.log(err);
+         logger.error(err.message, 'userController: getSingleUser',10);
+         res.send(response.generate(true,'Failed to find user details.', 500, null));
+       }else if(check.isEmpty(result)){
+         logger.info('No user found.','userController: getSingleUser');
+         res.send(response.generate(true,'No user found.', 404, null));
+       }else{
+          res.send(response.generate(false,'User details found.', 200, null));
+       }
+   })
+}
+
+
+/**To delete a user. */
+let deleteUser = (req, res)=>{
+   UserModel.findOneAndRemove({'userId': req.params.userId})
+   .exec((err, result)=>{
+      if(err){
+        console.log(err);
+        logger.error(err.message, 'userController: deleteUser', 10);
+        res.send(response.generate(true,'Failed to delete user.', 500, null));
+      }else if(check.isEmpty(result)){
+        logger.info('No user found.','userController: deleteUser');
+        res.send(response.generate(true,'No user found.', 404, null));
+      }else{
+         res.send(response.generate());
+      }
+   });
+}
+
 /**User LogOut function. */
 let logOut = (req,res)=>{
 
@@ -219,5 +275,8 @@ let logOut = (req,res)=>{
 module.exports = {
     signUpFunction:signUpFunction,
     logInFunction:logInFunction,
-    logOut:logOut
+    logOut:logOut,
+    getSingleUser:getSingleUser,
+    getAllUsers:getAllUsers,
+    deleteUser:deleteUser
 }
