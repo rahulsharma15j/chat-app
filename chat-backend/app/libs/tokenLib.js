@@ -19,7 +19,8 @@ let generateToken = (data,cb)=>{
        };
 
        let tokenDetails = {
-           token: jwt.sign(claims,secretKey)
+           token: jwt.sign(claims,secretKey),
+           tokenSecret: secretKey
        };
        cb(null,tokenDetails);
    }catch(err){
@@ -33,7 +34,7 @@ let generateToken = (data,cb)=>{
  * @param {*} token 
  * @param {*} cb 
  */
-let verifyClaim = (token, cb)=>{
+let verifyClaim = (token, secretKey,cb)=>{
    jwt.verify(token, secretKey, (err,decoded)=>{
       if(err){
          console.log("Error while verify token.");

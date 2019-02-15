@@ -214,7 +214,7 @@ let logInFunction = (req,res)=>{
 /**Get all users details. */
 let getAllUsers = (req, res)=>{
     UserModel.find()
-    .select('-__v -_id')
+    .select('-password -__v -_id')
     .lean()
     .exec((err, result)=>{
        if(err){
@@ -225,7 +225,7 @@ let getAllUsers = (req, res)=>{
          logger.info('No user found.', 'userController: getAllUsers()');
          res.send(response.generate(true, 'No user found.', 404, null));
        }else{
-          res.send(response.generate(false, 'All users details found.', 200, null));
+          res.send(response.generate(false, 'All users details found.', 200, result));
        }
     })
 }
@@ -244,7 +244,7 @@ let getSingleUser = (req, res)=>{
          logger.info('No user found.','userController: getSingleUser');
          res.send(response.generate(true,'No user found.', 404, null));
        }else{
-          res.send(response.generate(false,'User details found.', 200, null));
+          res.send(response.generate(false,'User details found.', 200, result));
        }
    })
 }
@@ -262,14 +262,41 @@ let deleteUser = (req, res)=>{
         logger.info('No user found.','userController: deleteUser');
         res.send(response.generate(true,'No user found.', 404, null));
       }else{
-         res.send(response.generate());
+         res.send(response.generate(false,'User deleted successfully.', 200, null));
       }
+   });
+}
+
+/**To edit user details. */
+let editUser = (req, res)=>{
+   let options = req.body;
+   UserModel.update({'userId': req.params.userId},options).exec((err, result)=>{
+     if(err){
+       console.log(err);
+       logger.error(err.message,'User controller:edituser',10);
+       res.send(response.generate(true,'Failed to edit user details.',500,null));
+     }else if(check.isEmpty(result)){
+        logger.info('No user found.','user contoller: edituser');
+        res.send(response.generate(true,'No user found.',404,null));
+     }else{
+        res.send(response.generate(false,'User details edited.',200,result));
+     }
    });
 }
 
 /**User LogOut function. */
 let logOut = (req,res)=>{
-
+   AuthModel.findOneAndRemove({userId:req.user.userId}, (err, result)=>{
+     if(err){
+       console.log(err);
+       logger.error(err.message,'user controller: logout',10);
+       res.send(response.generate(true,`error occured: ${err.message}`, 500,null));
+     }else if(check.isEmpty(result)){
+       res.send(response.generate(true,'Already logged out or invalid user.',404,null));
+     }else{
+        res.send(response.generate(false,'Logged out successfully.',200,null));
+     }
+   })
 }
 
 module.exports = {
@@ -278,5 +305,6 @@ module.exports = {
     logOut:logOut,
     getSingleUser:getSingleUser,
     getAllUsers:getAllUsers,
-    deleteUser:deleteUser
+    deleteUser:deleteUser,
+    editUser:editUser
 }

@@ -21,12 +21,15 @@ let isAuthorized = (req, res, next)=>{
                logger.error('No authorizationkey is present.', 'Authorization middleware.', 10);
                res.send(response.generate(true,'Invalid or expired authorization key.', 404, null));
              }else{
+                
                  token.verifyClaim(authDetails.authToken, authDetails.tokenSecret, (err, decoded)=>{
+                    
                    if(err){
                      logger.error(err.message, 'Authorization middleware.', 10);
                      res.send(response.generate(true, 'Failed to authorized while verify token.', 500, null));
                    }else{
-                       res.user = { userId: decoded.data.userId };
+                       req.user = { userId: decoded.data.userId };
+                        
                        next();
                    }
                  });
