@@ -48,7 +48,22 @@ let verifyClaim = (token, secretKey,cb)=>{
    });
 }
 
+let verifyClaimWithoutSecret = (token,cb)=>{
+    jwt.verify(token, secretKey, (err,decoded)=>{
+       if(err){
+          console.log("Error while verify token.");
+          console.log(err);
+          cb(err,null);
+       }else{
+           console.log('user verified.');
+           console.log(decoded);
+           cb(null,decoded);
+       }
+    });
+ }
+
 module.exports = {
     generateToken:generateToken,
-    verifyClaim:verifyClaim
+    verifyClaim:verifyClaim,
+    verifyClaimWithoutSecret:verifyClaimWithoutSecret
 }

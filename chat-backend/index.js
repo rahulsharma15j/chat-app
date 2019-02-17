@@ -56,6 +56,10 @@ server.listen(appConfig.port);
 server.on('error',onError);
 server.on('listening',onListening);
 
+/**socket io connection handler */
+const socketLib = require('./app/libs/socketLib');
+const socketServer = socketLib.setServer(server);
+
 /**Event listener for HTTP server "error" event. */
 function onError(error){
    if(error.syscall !== 'listen'){
