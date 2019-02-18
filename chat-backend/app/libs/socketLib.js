@@ -13,7 +13,7 @@ let setServer = (server)=>{
     let allOnlineUsers = [];
     let io = socketIo.listen(server);
     let myIo = io.of('');
-    myIo.on('connection', (server)=>{
+    myIo.on('connection', (socket)=>{
        console.log('On connection emitting verify user.');
        socket.emit('verifyUser','');
        socket.on('set-user', (authToken)=>{
