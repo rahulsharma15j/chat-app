@@ -8,6 +8,8 @@ const eventEmitter = new events.EventEmitter();
 const token = require('./../libs/tokenLib');
 const check = require('./checkLib');
 const response = require('./responseLib');
+const shortId = require('shortid');
+const Chat = require('./../models/Chat');
 
 let setServer = (server)=>{
     let allOnlineUsers = [];
@@ -54,6 +56,9 @@ let setServer = (server)=>{
 
        socket.on('chat-msg',(data)=>{
          console.log(data);
+         data['chatId'] = shortId.generate();
+         console.log(data);
+         setTimeout(()=>{eventEmitter.emit('save-chat',data)},2000);
          myIo.emit(data.receiverId,data);
        });
 
@@ -65,6 +70,31 @@ let setServer = (server)=>{
     });
 }
 
+//database operation are kept outside of socket.io code
+//saving chats to database
+eventEmitter.on('save-chat', (data)=>{
+   let newChat = new Chat({
+      chatId: data.chatId,
+      senderName: data.senderName,
+      senderId: data.senderId,
+      receiverName: data.receiverName,
+      receiverId: data.receiverId,
+      message: data.message,
+      chatRoom : data.chatRoom,
+      createdOn: data.createdOn
+   });
+
+   newChat.save((err, result)=>{
+      if(err){
+        console.log(`error occurred: ${err}`);
+      }else if(result == undefined || result == null || result == ''){
+        console.log('chat is not saved.');
+      }else{
+         console.log('Chat saved.');
+         console.log(result);
+      }
+   });
+});
 
 module.exports = {
     setServer:setServer
