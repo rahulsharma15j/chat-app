@@ -193,3 +193,100 @@ let markChatAsSeen = (req,res)=>{
       res.send(err);
    });
 }
+
+let countUnSeenChat = (req, res)=>{
+   //function to validate params.
+   let validateParams = ()=>{
+       return new Promise((resolve, reject)=>{
+           if(check.isEmpty(req.query.userId)){
+             logger.info('Parameters missing.','countUnseenchat hadler',9);
+             reject(response.generate(true,'Parameters missing.',404,null));
+           }else{
+               resolve(req);
+           }
+       });
+   }
+
+   //function to get chats.
+   let countChat = ()=>{
+       return new Promise((resolve,reject)=>{
+           //creating find query.
+           let findQuery = {};
+           findQuery['receiverId'] = req.query.userId;
+           findQuery['seen'] = false;
+
+           if(check.isEmpty(req.query.senderId) === false){
+              findQuery['senderId'] = req.query.senderId;
+           }
+           Chat.count(findQuery)
+           .exec((err, result)=>{
+              if(err){
+                console.log(err);
+                logger.error(err.message,'chat controller. countunseen chat',10);
+                reject(response.generate(true,`error occurred: ${err.message}`, 500, null));
+              }else{
+                  console.log('unseen chat count found.');
+                  resolve(result);
+              }
+           });
+       });
+   }
+
+   //making promise call.
+   validateParams(req,res)
+   .then(countChat)
+   .then((result)=>{
+      res.send(response.generate(false,'unseen chat count found',200, result));
+   })
+   .catch((err)=>{
+      res.send(err);
+   });
+}
+
+/**
+ * function to get unread messages
+ * params: userId, senderId.
+ */
+let findUnSeenChat = (req, res)=>{
+   //function to validate params.
+   let validateParams = ()=>{
+       return new Promise((resolve,reject)=>{
+          if(check.isEmpty(req.query.userId)){
+            logger.info('Parameters missing.','findUnseenChat handler',9);
+            reject(response.generate(true,'Parameters missing.',403,null));
+          }{ resolve() }
+       });
+   }
+
+   //function to get chats.
+   let findChats = ()=>{
+       return new Promise((resove, reject)=>{
+         //creating find query.
+         let findQuery = {};
+
+         findQuery['receiverId'] = req.query.userId;
+         findQuery['seen'] = false;
+
+         if(check.isEmpty(req.query.senderId === false)){
+            findQuery['senderId'] = req.query.senderId;
+         }
+
+         Chat.find(findQuery)
+         .select('-_id -__v')
+         .sort('-createdOn')
+         .skip(parseInt(req.query.skip) || 0)
+         .lean()
+         .limit(10)
+         .exec((err, result)=>{
+             if(err,result){
+                console.log(err);
+                logger.error(err.message,`Chat controller: findUnseenchat`,10);
+                reject(response.generate(true,`error occurred: ${err.message}`, 500,null));
+             }else if(check.isEmpty(result)){
+                logger.info('No chat found.','Chat controller: findUnseenChat');
+                reject(response.generate(true,'No chat found.',404,null));
+             }
+         });
+       });
+   }
+}
