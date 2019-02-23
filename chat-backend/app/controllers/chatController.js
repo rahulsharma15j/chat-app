@@ -285,8 +285,111 @@ let findUnSeenChat = (req, res)=>{
              }else if(check.isEmpty(result)){
                 logger.info('No chat found.','Chat controller: findUnseenChat');
                 reject(response.generate(true,'No chat found.',404,null));
+             }else{
+                 console.log('chat found and listed.');
+                 let reverseResult = result.reverse();
+                 resolve(result);
              }
          });
        });
    }
+
+   //making promise call.
+   validateParams()
+   .then(findChats)
+   .then((result)=>{
+      res.send(response.generate(false,'chat found and listed.',200, result));
+   })
+   .catch((err)=>{
+      res.send(err);
+   });
+}//end of the findUnseenChatfunction.
+
+/**
+ * function to find user from whom chat is unseen.
+ * params: userId.
+ */
+let findUserListOfUnseenChat = ()=>{
+    console.log('inside finduserlistofunseenchat function');
+
+    //function to validate params.
+    let validateParams = ()=>{
+        return new Promise((resolve,reject)=>{
+          if(check.isEmpty(req.query.userId)){
+            logger.info('Parameters missing.','findUserListOfUnseenChat handler',9);
+            reject(response.generate(true,'Parameters missing.', 403,null));
+          }else {
+              resolve(req);
+          }
+        });
+    }//end of the validate params.
+
+    //find distinct sender.
+    let findDistinctSender = ()=>{
+        return new Promise((resove,reject)=>{
+            Chat.distinct('senderId',{receiverId:req.query.userId, seen: false})
+            .exec((err, senderIdList)=>{
+               if(err){
+                  console.log(err);
+                  logger.error(err.message,'Chat controller: findUserListOfUnseenChat', 10);
+                  reject(response.generate(true,`error occurred: ${err.message}`, 500,null));
+               }else if(check.isEmpty(senderIdList)){
+                  logger.info('No unseen chat user found.','Chat controller: findUserListOfUnseenChat');
+                  reject(response.generate(true,'No unseen chat user found', 404, null));
+               }else{
+                   console.log('user found and user id listed.');
+                   console.log(senderIdList);
+                   resolve(senderIdList);
+               }
+            })
+        });
+    }//end of finddistinctSender function.
+
+    //function to find user info.
+    let findUserInfo = (senderIdList)=>{
+       return new Promise((resolve, reject)=>{
+          User.find({userId:{$in:senderIdList}})
+          .select('-_id -__v -password -email -mobileNumber')
+          .lean()
+          .exec((err, result)=>{
+             if(err){
+               logger.error(err.message,'Chat controller: findUserListOfUnseenChat',10);
+               reject(response.generate(true,`error occurred: ${err.message}`, 500 ,null));
+             }else if(check.isEmpty(result)){
+               logger.info('No user found.','Chat controller: findUserListOfUnseenChat');
+               reject(response.generate(true,'No user found.', 404,null));
+             }else{
+                 console.log('user found and userId listed.');
+                 resolve(result);
+             }
+          });
+       });
+    }//end of findUserInfo.
+
+    validateParams(req,res)
+    .then(findDistinctSender)
+    .then(findUserInfo)
+    .then((result)=>{
+        res.send(response.generate(false,'user found and listed.',200, result));
+    })
+    .catch((err)=>{
+        res.send(err);
+    });
+
+}//end of findUserListOfUnseenChat function.
+
+/**
+ * exporting function.
+ */
+module.exports = {
+    getUsersChat:getUsersChat,
+    getGroupChat:getGroupChat,
+    markChatAsSeen:markChatAsSeen,
+    countUnSeenChat:countUnSeenChat,
+    findUnSeenChat:findUnSeenChat,
+    findUserListOfUnseenChat:findUserListOfUnseenChat
 }
+
+
+
+
