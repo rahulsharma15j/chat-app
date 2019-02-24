@@ -19,8 +19,9 @@ const Auth = require('../models/Auth');
 let getUsersChat = (req,res)=>{ 
     //function to validate params.
    let validateParams = ()=>{
+       console.log(req.query);
        return new Promise((resolve, reject)=>{
-          if(check.isEmpty(req.params.senderId) || check.isEmpty(req.params.receiverId)){
+          if(check.isEmpty(req.query.senderId) || check.isEmpty(req.query.receiverId)){
               logger.info('Parameters missing.', 'getUsersChat handler', 9);
               reject(response.generate(true,'parameters missing.',403,null));
           }else { resolve(req) }
@@ -74,7 +75,7 @@ let getUsersChat = (req,res)=>{
   validateParams(req,res)
   .then(findChats)
   .then((result)=>{
-      res.send(false,'All Chats listed.', 200, result);
+      res.send(response.generate(false,'All Chats listed.', 200, result));
   })
   .catch((err)=>{
      res.send(err);

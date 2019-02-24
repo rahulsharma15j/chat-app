@@ -1,14 +1,8 @@
 const socketIo = require('socket.io');
-const mongoose = require('mongoose');
 const shortId = require('shortid');
-const logger = require('./loggerLib');
 const events = require('events');
 const eventEmitter = new events.EventEmitter();
-
 const token = require('./../libs/tokenLib');
-const check = require('./checkLib');
-const response = require('./responseLib');
-const shortId = require('shortid');
 const Chat = require('./../models/Chat');
 
 let setServer = (server)=>{
